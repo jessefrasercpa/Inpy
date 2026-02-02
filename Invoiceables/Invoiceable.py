@@ -8,6 +8,22 @@ from Rentables import (
 
 @dataclass
 class Invoiceable:
+    """
+    Encapsulates an invoiceable entity which has
+    a selection of rooms, a list of supported add-ons,
+    and a duration of time over which the rooms and add-ons are to be rented.
+
+    Attributes
+    ----------
+    addOns : List[AddOn]
+        A list of supported add-ons.
+
+    rooms : List[Room]
+        A selection of rooms.
+
+    t : float
+        A duration of time over which the rooms and add-ons are to be rented.
+    """
 
 
     addOns: List[AddOn]
@@ -16,6 +32,9 @@ class Invoiceable:
 
 
     def approve(self):
+        """
+        Checks whether addOns is fully supported by the current room selection in rooms.
+        """
 
         for addOn in self.addOns:
 
