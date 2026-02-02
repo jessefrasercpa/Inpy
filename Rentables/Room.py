@@ -1,6 +1,6 @@
 from __future__ import annotations
-from dataclasses import dataclass, field
-from typing import List, TYPE_CHECKING
+from dataclasses import dataclass
+from typing import Tuple, TYPE_CHECKING
 from .Rentable import Rentable
 
 
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class Room(Rentable):
 
 
-    addOns: List["AddOn"] = field(default_factory=list) # type: ignore
+    addOns: Tuple["AddOn", ...] = ()
 
 
     def supports(self, addOn: "AddOn") -> bool:
