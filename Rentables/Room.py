@@ -1,12 +1,7 @@
-from __future__ import annotations
 from dataclasses import dataclass
-from typing import Tuple, TYPE_CHECKING
+from typing import Tuple
 from .Rentable import Rentable
-
-
-if TYPE_CHECKING:
-
-    from .AddOn import AddOn
+from .AddOn import AddOn
 
 
 @dataclass(frozen=True)
@@ -26,10 +21,10 @@ class Room(Rentable):
     """
 
 
-    addOns: Tuple["AddOn", ...] = ()
+    addOns: Tuple[AddOn, ...] = ()
 
 
-    def supports(self, addOn: "AddOn") -> bool:
+    def supports(self, addOn: AddOn) -> bool:
         """
         Checks whether a given add-on is supported by this room.
 
