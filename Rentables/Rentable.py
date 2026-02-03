@@ -1,8 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable
-
-
-RateFunc = Callable[[float], float]
+from .utils import Rate
 
 
 @dataclass(frozen=True)
@@ -15,23 +12,23 @@ class Rentable:
     name : str
         A Human-readable identifier.
 
-    rateFunc : Callable[[float], float]
-        A function that computes the rental cost over a given duration of time.
+    rate : Rate
+        A Rate object which is used to calculate the subtotal of this rentable.
 
     Methods
     -------
-    rate(t: float) -> float
-        Computes the rental cost over a given duration of time.
+    subtotal(t: float) -> float
+        Computes the subtotal of this rentable.
     """
 
 
     name: str
-    rateFunc: RateFunc
+    rate: Rate
 
 
-    def rate(self, t: float) -> float:
+    def subtotal(self, t: float) -> float:
         """
-        Computes the rental cost over a given duration of time.
+        Computes the subtotal of this rentable.
 
         Parameters
         ----------
@@ -41,7 +38,7 @@ class Rentable:
         Returns
         -------
         float
-            The rental cost.
+            The subtotal.
         """
 
-        return self.rateFunc(t)
+        return self.rate.calculate(t)
