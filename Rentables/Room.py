@@ -39,4 +39,4 @@ class Room(Rentable):
             True if the add-on is in this room's addOns, False otherwise.
         """
 
-        return any(a.name == addOn.name for a in self.addOns)
+        return any(a.id == addOn.id for a in self.addOns)

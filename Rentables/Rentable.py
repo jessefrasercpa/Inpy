@@ -9,6 +9,9 @@ class Rentable:
 
     Attributes
     ----------
+    id : str
+        A unique identifier.
+        
     name : str
         A Human-readable identifier.
 
@@ -22,6 +25,7 @@ class Rentable:
     """
 
 
+    id: str
     name: str
     rate: Rate
 

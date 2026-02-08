@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Callable
+from dataclasses import dataclass, field
+from typing import Dict, Callable, Any
 
 
 RateFunc = Callable[[float], float]
@@ -18,6 +18,9 @@ class Rate:
     rateFunc : Callable[[float], float]
         A function that computes the rental cost over a given duration of time.
 
+    params : Dict[str, Any]
+        The rate function's parameters.
+
     Methods
     -------
     calculate(t: float) -> float
@@ -27,6 +30,7 @@ class Rate:
 
     name: str
     rateFunc: RateFunc
+    params: Dict[str, Any] = field(default_factory=dict)
 
 
     def calculate(self, t: float) -> float:

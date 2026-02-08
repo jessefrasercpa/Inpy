@@ -1,4 +1,5 @@
 from typing import List, Callable
+from dataclasses import dataclass
 from Invoiceables import Invoiceable
 from .Discount import Discount
 
@@ -6,18 +7,15 @@ from .Discount import Discount
 RateFunc = Callable[[float], float]
 
 
+@dataclass(frozen=True)
 class RoomBundleDiscount(Discount):
 
 
-    def __init__(self, name: str, rateFunc: RateFunc, roomBundleNames: List[str]):
-
-        super().__init__(name, rateFunc)
-        
-        self._roomBundleNames = roomBundleNames
+    roomBundleNames: List[str]
 
 
     def applies(self, invoiceable: Invoiceable) -> bool:
 
         selectedNames = {room.name for room in invoiceable.rooms}
 
-        return set(self._roomBundleNames).issubset(selectedNames)
+        return set(self.roomBundleNames).issubset(selectedNames)

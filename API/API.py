@@ -1,20 +1,14 @@
-"""
-TODO
-----
-
- - Fix type: ignore(s).
-"""
-
 from datetime import date
-from dataclasses import fields
-from typing import Dict, Any, Type, TypeVar
+from dataclasses import fields, asdict
+from typing import Dict, Any, Type, TypeVar, List
 from Rentables import (
     AddOn,
     Room
 )
 from Rentables.utils import (
     Rate,
-    RateRegistry,
+    Param,
+    RateRegistry
 )
 from Discounts import (
     Discount,
@@ -62,21 +56,38 @@ class API:
         }
 
 
-    def listRate(self):
+    def listRates(self):
 
         return self._rateRegistry.listRates()
+
+    
+    def registerRate(self, name: str, params: List[Param]):
+
+        return self._rateRegistry.registerRate(name, params)
     
 
-    def listDiscount(self):
+    def getRateParams(self, name: str) -> List[Dict[str, Any]]:
+
+        params = self._rateRegistry.getRateParams(name)
+        return [asdict(param) for param in params]
+    
+
+    def listDiscounts(self):
 
         return self._discountRegistry.listDiscounts()
+    
+
+    def getDiscountParams(self, name: str) -> List[Dict[str, Any]]:
+
+        params = self._discountRegistry.getDiscountParams(name)
+        return [asdict(param) for param in params]
     
 
     def _jsonToDTO(self, DTOCls: Type[DTO], json: Dict[str, Any]) -> DTO:
 
         kwargs: Dict[str, Any] = {}
 
-        for field in fields(DTOCls): # type: ignore
+        for field in fields(DTOCls):
 
             key = field.name
 
@@ -92,7 +103,7 @@ class API:
 
                 if isinstance(val, list):
 
-                    kwargs[key] = [self._jsonToDTO(cls, item) for item in val] # type: ignore
+                    kwargs[key] = [self._jsonToDTO(cls, item) for item in val]
 
                 else:
 
@@ -147,7 +158,7 @@ class API:
 
             rate = self._buildRate(addOnDTO.rate)
 
-            return AddOn(name=addOnDTO.name, rate=rate)
+            return AddOn(id=addOnDTO.id, name=addOnDTO.name, rate=rate)
         
         except Exception as e:
 
@@ -168,7 +179,7 @@ class API:
             rate   = self._buildRate(roomDTO.rate)
             addOns = [self._buildAddOn(addOn) for addOn in roomDTO.addOns]
 
-            return Room(name=roomDTO.name, rate=rate, addOns=tuple(addOns))
+            return Room(id=roomDTO.id, name=roomDTO.name, rate=rate, addOns=tuple(addOns))
         
         except Exception as e:
 

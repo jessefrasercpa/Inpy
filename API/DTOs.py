@@ -22,6 +22,7 @@ class DiscountDTO:
 class AddOnDTO:
 
 
+    id: str
     name: str
     rate: RateDTO
 
@@ -30,6 +31,7 @@ class AddOnDTO:
 class RoomDTO:
 
 
+    id: str
     name: str
     rate: RateDTO
     addOns: List[AddOnDTO]
