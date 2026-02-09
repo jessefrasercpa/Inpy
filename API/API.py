@@ -77,6 +77,11 @@ class API:
         return self._discountRegistry.listDiscounts()
     
 
+    def registerDiscount(self, name: str, params: List[Param]):
+
+        return self._discountRegistry.registerDiscount(name, params)
+    
+
     def getDiscountParams(self, name: str) -> List[Dict[str, Any]]:
 
         params = self._discountRegistry.getDiscountParams(name)
