@@ -1,5 +1,5 @@
 from .Discount import Discount
 from .DiscountRegistry import DiscountRegistry
-from .RoomBundleDiscount import RoomBundleDiscount
+from .DefaultDiscounts import registerDefaultDiscounts
 
-__all__ = ["Discount", "DiscountRegistry", "RoomBundleDiscount"]
+__all__ = ["Discount", "DiscountRegistry", "registerDefaultDiscounts"]
