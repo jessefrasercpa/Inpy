@@ -1,8 +1,12 @@
-from typing import List, Dict, Any
+from typing import TYPE_CHECKING, Dict, Any
 from Rentables.utils import Param
 from Discounts import Discount
 from Invoiceables import Invoiceable
-from API import API
+
+
+if TYPE_CHECKING:
+
+    from API import API
 
 
 def registerDefaultDiscounts(api: API):

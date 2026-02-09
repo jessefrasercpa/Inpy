@@ -1,7 +1,11 @@
-from typing import Dict, Any
+from typing import TYPE_CHECKING, Dict, Any
 from .Rate import Rate
 from .Param import Param
-from API import API
+
+
+if TYPE_CHECKING:
+
+    from API import API
 
 
 def registerDefaultRates(api: API):
