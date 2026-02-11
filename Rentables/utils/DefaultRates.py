@@ -11,10 +11,19 @@ if TYPE_CHECKING:
 def registerDefaultRates(api: API):
 
 
-    @api.registerRate("Fixed Rate", [Param(name="rate", type="float", description="Cost per unit time")])
+    @api.registerRate(
+            "Fixed Rate",
+            [
+                Param(
+                    name="Rate",
+                    type="float",
+                    description="Cost per unit time"
+                )
+            ]
+    )
     def buildFixedRate(params: Dict[str, Any]) -> Rate:
 
-        rate = float(params["rate"])
+        rate = float(params["Rate"])
 
         return Rate(
             name="Fixed Rate",
@@ -22,10 +31,19 @@ def registerDefaultRates(api: API):
         )
 
 
-    @api.registerRate("Flat Rate", [Param(name="rate", type="float", description="Flat cost")])
+    @api.registerRate(
+            "Flat Rate",
+            [
+                Param(
+                    name="Rate",
+                    type="float",
+                    description="Flat cost"
+                )
+            ]
+    )
     def buildFlatRate(params: Dict[str, Any]) -> Rate:
 
-        rate = float(params["rate"])
+        rate = float(params["Rate"])
 
         return Rate(
             name="Flat Rate",
