@@ -4,12 +4,11 @@ from rich.console import Console
 from Rentables.utils import registerDefaultRates
 from Discounts import registerDefaultDiscounts
 from API import API
-from .utils import AddOnRepo
+from .utils import (
+    AddOnRepo,
+    RoomRepo
+)
 
-
-FIELD_STYLE  = "dim"
-RATE_COLOUR  = "red"
-ADDON_COLOUR = "white"
 
 SUCCESS_COLOUR = "green"
 ERROR_COLOUR   = "red"
@@ -20,6 +19,7 @@ registerDefaultRates(api)
 registerDefaultDiscounts(api)
 
 addOnRepo = AddOnRepo(api)
+roomRepo  = RoomRepo(api)
 
 console = Console()
 
@@ -32,6 +32,11 @@ def cli():
 
 @cli.group()
 def addOns():
+
+    pass
+
+@cli.group()
+def rooms():
 
     pass
 
@@ -98,7 +103,7 @@ def promptParams(paramsJSON):
             clickType = buildClickType(parseListType(type_), constraints)
 
             items = []
-            count = 0
+            count = 1
 
             console.print(f"{promptDescription} | Enter one per line, blank to finish . . .")
 
@@ -148,41 +153,9 @@ def promptParams(paramsJSON):
     return values
 
 
-def getRateTable(rate):
-
-    rateTable = Table(
-        show_header=False,
-        box=None
-    )
-    
-    rateTable.add_column("Field", style=FIELD_STYLE)
-    rateTable.add_column("Value", style=RATE_COLOUR)
-
-    rateTable.add_row("Name", rate.name)
-
-    for key, value in rate.params.items():
-
-        rateTable.add_row(key, str(value))
-
-    return rateTable
-
-
-def printAddOn(addOn):
-
-    table = Table(
-        title=f"Add-On: {addOn.name}",
-        show_header=False,
-        border_style=ADDON_COLOUR
-    )
-    
-    table.add_column("Field", style=FIELD_STYLE)
-    table.add_column("Value", style=ADDON_COLOUR)
-
-    table.add_row("ID", addOn.id)
-    table.add_row("Name", addOn.name)
-    table.add_row("Rate", getRateTable(addOn.rate))
-
-    console.print(table)
+# ============================================================================ #
+# Add-Ons                                                                      #
+# ============================================================================ #
 
 
 @addOns.command("new")
@@ -190,7 +163,10 @@ def newAddOn():
 
     name = click.prompt("Add-On Name")
 
-    rateType       = click.prompt("Select Rate Type", type=click.Choice(api.listRates()))
+    rateType       = click.prompt(
+        "Select Rate Type",
+        type=click.Choice(api.listRates())
+    )
     metaRateParams = api.getRateParams(rateType)
     rateParams     = promptParams(metaRateParams)
 
@@ -209,12 +185,24 @@ def newAddOn():
 
         console.print(
             f"\n[{SUCCESS_COLOUR}][SUCCESS][/{SUCCESS_COLOUR}] " \
-            f"Add-On [{ADDON_COLOUR}]'{addOn.name}'[/{ADDON_COLOUR}] " \
+            f"Add-On '{addOn.name}' " \
             f"(id: {addOn.id}) " \
-            f"succefully created\n"
+            f"successfully created\n"
         )
 
-        printAddOn(addOn)
+        table = Table(
+            title=f"Add-On: {addOn.name}",
+            show_header=False,
+        )
+    
+        table.add_column("Field")
+        table.add_column("Value")
+
+        table.add_row("ID", addOn.id)
+        table.add_row("Name", addOn.name)
+        table.add_row("Rate", addOn.rate.name)
+
+        console.print(table)
 
     except ValueError as e:
 
@@ -234,9 +222,9 @@ def deleteAddOn():
 
         console.print(
             f"\n[{SUCCESS_COLOUR}][SUCCESS][/{SUCCESS_COLOUR}] " \
-            f"Add-On [{ADDON_COLOUR}]'{addOn.name}'[/{ADDON_COLOUR}] " \
+            f"Add-On '{addOn.name}' " \
             f"(id: {addOn.id}) " \
-            f"succefully deleted"
+            f"successfully deleted"
         )
 
     except ValueError as e:
@@ -252,23 +240,20 @@ def listAddOns():
     if not addOns:
 
         console.print(
-            f"[{ERROR_COLOUR}][ERROR][/{ERROR_COLOUR}] " \
-            f"No [{ADDON_COLOUR}]Add-Ons to[/{ADDON_COLOUR}] list"
+            f"\n[{ERROR_COLOUR}][ERROR][/{ERROR_COLOUR}] " \
+            f"No Add-Ons to list"
         )
 
         return
     
     console.print(
         f"\n[{SUCCESS_COLOUR}][SUCCESS][/{SUCCESS_COLOUR}] " \
-        f"[{ADDON_COLOUR}]Add-Ons[/{ADDON_COLOUR}]:\n"
+        f"Add-Ons:\n"
     )
 
-    table = Table(
-        border_style=ADDON_COLOUR,
-        show_lines=True
-    )
+    table = Table()
 
-    table.add_column("ID", style=FIELD_STYLE)
+    table.add_column("ID")
     table.add_column("Name")
     table.add_column("Rate")
 
@@ -277,10 +262,183 @@ def listAddOns():
         table.add_row(
             addOn.id,
             addOn.name,
-            getRateTable(addOn.rate)
+            addOn.rate.name
         )
 
     console.print(table)
+
+
+# ============================================================================ #
+
+
+# ============================================================================ #
+# Rooms                                                                        #
+# ============================================================================ #
+
+
+def printRoom(room):
+
+    table = Table(title=f"Room: {room.name}", show_header=False)
+
+    table.add_column("Field")
+    table.add_column("Value")
+
+    table.add_row("ID", room.id)
+    table.add_row("Name", room.name)
+    table.add_row("Rate", room.rate.name)
+    
+    if room.addOns:
+
+        table.add_row("Add-On", ", ".join([addOn.name for addOn in room.addOns]))
+
+    console.print(table)
+
+
+@rooms.command("new")
+def newRoom():
+
+    name = click.prompt("Room Name")
+
+    rateType       = click.prompt("Select Rate Type", type=click.Choice(api.listRates()))
+    metaRateParams = api.getRateParams(rateType)
+    rateParams     = promptParams(metaRateParams)
+
+    addOnsObjs    = addOnRepo.ls()
+    addOnNames    = [addOn.name for addOn in addOnsObjs]
+    addOnNameToAddOn = {addOn.name: addOn for addOn in addOnsObjs}
+
+    addOns = []
+    count  = 1
+
+    console.print(
+        f"Select Add-Ons ({addOnNames}) | Enter one per line, blank to finish . . ."
+    )
+
+    while True:
+
+        try:
+
+            addOnName = click.prompt(
+                f"\t\t[{count}]",
+                default="",
+                show_default=False
+            )
+
+            if addOnName == "":
+
+                break
+
+            addOnName = click.Choice(addOnNames).convert(addOnName, None, None)
+            addOn     = addOnNameToAddOn[addOnName]
+
+            addOns.append(
+                {
+                    "id": addOn.id,
+                    "name": addOn.name,
+                    "rate": {
+                        "rateType": addOn.rate.name,
+                        "params": addOn.rate.params
+                    }
+                }
+            )
+
+            count += 1
+
+        except click.BadParameter as e:
+
+            console.print(f"[{ERROR_COLOUR}][ERROR][/{ERROR_COLOUR}] {e}")
+
+
+    try:
+
+        room = roomRepo.add(
+            {
+                "id": name.lower().replace(" ", "_"),
+                "name": name,
+                "rate": {
+                    "rateType": rateType,
+                    "params": rateParams
+                },
+                "addOns": addOns
+            }
+        )
+
+        console.print(
+            f"\n[{SUCCESS_COLOUR}][SUCCESS][/{SUCCESS_COLOUR}] " \
+            f"Room '{room.name}' " \
+            f"(id: {room.id}) " \
+            f"successfully created\n"
+        )
+
+        printRoom(room)
+
+    except ValueError as e:
+
+        console.print(f"\n[{ERROR_COLOUR}][ERROR][/{ERROR_COLOUR}] {e}")
+
+
+@rooms.command("delete")
+def deleteRoom():
+
+    id    = click.prompt("Room id")
+
+    try:
+
+        room = roomRepo.get(id)
+
+        roomRepo.delete(id)
+
+        console.print(
+            f"\n[{SUCCESS_COLOUR}][SUCCESS][/{SUCCESS_COLOUR}] " \
+            f"Room '{room.name}' " \
+            f"(id: {room.id}) " \
+            f"successfully deleted"
+        )
+
+    except ValueError as e:
+
+        console.print(f"\n[{ERROR_COLOUR}][ERROR][/{ERROR_COLOUR}] {e}")
+
+
+@rooms.command("ls")
+def listRooms():
+
+    rooms = roomRepo.ls()
+
+    if not rooms:
+
+        console.print(
+            f"\n[{ERROR_COLOUR}][ERROR][/{ERROR_COLOUR}] " \
+            f"No Rooms to list"
+        )
+
+        return
+    
+    console.print(
+        f"\n[{SUCCESS_COLOUR}][SUCCESS][/{SUCCESS_COLOUR}] " \
+        f"Rooms:\n"
+    )
+
+    table = Table()
+
+    table.add_column("ID")
+    table.add_column("Name")
+    table.add_column("Rate")
+    table.add_column("Add-Ons")
+
+    for room in rooms:
+
+        table.add_row(
+            room.id,
+            room.name,
+            room.rate.name,
+            ", ".join([addOn.name for addOn in room.addOns])
+        )
+
+    console.print(table)
+
+
+# ============================================================================ #
 
 
 if __name__ == "__main__":
